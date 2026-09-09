@@ -1,0 +1,1230 @@
+<title>CRS Scenario Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F6F7F9; --surface:#FFFFFF; --surface-2:#EEF0F4;
+  --ink:#161C28; --muted:#5A6473; --faint:#8A93A2; --line:#DFE3EA; --line-2:#E9ECF1;
+  --accent:#284BC8; --accent-ink:#1B3491; --accent-wash:#EAEEFB;
+  --gain:#1E8E5A; --gain-wash:#E6F4EC; --loss:#C33B36; --loss-wash:#FBEAE9;
+  --amber:#B7791F;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05);
+  --shadow-lg:0 8px 30px rgba(16,24,40,.10);
+  --radius:12px; --radius-sm:8px;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --body:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+  --display:'Archivo',var(--body);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1220; --surface:#141B2B; --surface-2:#1C2537;
+    --ink:#E7EBF3; --muted:#98A2B4; --faint:#6C7688; --line:#273040; --line-2:#202A3A;
+    --accent:#6E8BFF; --accent-ink:#A8BAFF; --accent-wash:#18223B;
+    --gain:#4FD08A; --gain-wash:#12281E; --loss:#F17D77; --loss-wash:#2C1918;
+    --amber:#E0A94A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.28);
+    --shadow-lg:0 10px 34px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1220; --surface:#141B2B; --surface-2:#1C2537;
+  --ink:#E7EBF3; --muted:#98A2B4; --faint:#6C7688; --line:#273040; --line-2:#202A3A;
+  --accent:#6E8BFF; --accent-ink:#A8BAFF; --accent-wash:#18223B;
+  --gain:#4FD08A; --gain-wash:#12281E; --loss:#F17D77; --loss-wash:#2C1918;
+  --amber:#E0A94A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.28);
+  --shadow-lg:0 10px 34px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+button{font-family:var(--body);cursor:pointer}
+select,input{font-family:var(--body);color:var(--ink)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+
+/* ---- shell ---- */
+.wrap{max-width:1320px;margin:0 auto;padding:0 20px 64px}
+header.top{padding:26px 0 18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+.mark{width:38px;height:38px;border-radius:9px;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:19px;flex:none;
+  box-shadow:0 2px 8px rgba(40,75,200,.35)}
+.brand h1{font-size:23px;font-weight:800}
+.brand .sub{color:var(--muted);font-size:13.5px;margin-top:2px}
+.topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.note{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+.chip-note{font-size:12px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line-2);
+  padding:4px 10px;border-radius:20px;display:inline-flex;gap:6px;align-items:center}
+.chip-note b{color:var(--ink);font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+
+/* ---- layout ---- */
+.grid{display:grid;grid-template-columns:400px 1fr;gap:22px;margin-top:22px;align-items:start}
+@media (max-width:1020px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel-h{padding:15px 18px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:10px}
+.panel-h h2{font-size:15px;font-weight:700}
+.panel-h .kick{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.panel-b{padding:16px 18px}
+.rail{position:sticky;top:14px;display:flex;flex-direction:column;gap:22px}
+@media (max-width:1020px){.rail{position:static}}
+
+/* ---- baseline score readout ---- */
+.score-hero{display:flex;align-items:baseline;gap:12px;padding:2px 0 12px}
+.score-hero .big{font-family:var(--display);font-weight:800;font-size:52px;line-height:1;color:var(--accent)}
+.score-hero .of{color:var(--faint);font-size:14px}
+.score-hero .lab{margin-left:auto;text-align:right;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.bd{display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.bd .row{display:flex;align-items:center;gap:10px;font-size:13px;padding:4px 0}
+.bd .row .nm{color:var(--muted)}
+.bd .row .vl{margin-left:auto;font-family:var(--mono);font-weight:600}
+.bd .row.sum{border-top:1px dashed var(--line);margin-top:3px;padding-top:7px}
+.bd .row.sum .nm{color:var(--ink);font-weight:600}
+.bar-mini{height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin-top:9px}
+.bar-mini span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-ink))}
+
+/* ---- form controls ---- */
+.fgroup{margin-bottom:15px}
+.fgroup:last-child{margin-bottom:0}
+.glabel{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:700;
+  margin:16px 0 9px;display:flex;align-items:center;gap:8px}
+.glabel::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.field{margin-bottom:11px}
+.field > label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.ctl{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface);font-size:13.5px;color:var(--ink);appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%235A6473' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.ctl:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle-row{display:flex;align-items:center;gap:10px;padding:9px 0}
+.switch{position:relative;width:38px;height:22px;flex:none}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.slider{position:absolute;inset:0;background:var(--line);border-radius:20px;transition:.15s}
+.slider::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.switch input:checked + .slider{background:var(--accent)}
+.switch input:checked + .slider::before{transform:translateX(16px)}
+.switch input:focus-visible + .slider{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- variables list ---- */
+.vhint{font-size:12.5px;color:var(--muted);margin:-2px 0 14px;line-height:1.45}
+.var{border:1px solid var(--line-2);border-radius:var(--radius-sm);margin-bottom:9px;background:var(--surface);overflow:hidden}
+.var.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.var-h{display:flex;align-items:center;gap:11px;padding:10px 12px}
+.var-h .vname{font-weight:600;font-size:13.5px}
+.var-h .vbase{margin-left:auto;font-size:11.5px;color:var(--faint);font-family:var(--mono);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.var.on .var-h .vbase{display:none}
+.var-body{padding:0 12px 12px;display:none;flex-wrap:wrap;gap:6px}
+.var.on .var-body{display:flex}
+.opt{font-size:12px;padding:5px 9px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--muted);cursor:pointer;transition:.12s;user-select:none}
+.opt:hover{border-color:var(--accent);color:var(--ink)}
+.opt.sel{background:var(--accent-wash);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.opt.mini{font-family:var(--mono)}
+.var-tools{width:100%;display:flex;gap:12px;margin-bottom:2px}
+.var-tools button{font-size:11.5px;background:none;border:none;color:var(--accent);padding:0;font-weight:600}
+
+/* ---- results ---- */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line-2);
+  border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+.stat{background:var(--surface);padding:14px 16px}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600}
+.stat .v{font-family:var(--display);font-weight:800;font-size:27px;margin-top:5px;line-height:1}
+.stat .v.accent{color:var(--accent)}
+.stat .v.gain{color:var(--gain)} .stat .v.loss{color:var(--loss)}
+.stat .s{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+.results-h{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.results-h h2{font-size:18px;font-weight:700}
+.results-h .count{font-size:12.5px;color:var(--muted);background:var(--surface-2);padding:3px 10px;border-radius:14px}
+.results-h .right{margin-left:auto;display:flex;gap:8px}
+
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--radius-sm);
+  padding:8px 14px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-ink);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--accent)}
+.btn svg{width:15px;height:15px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden}
+.tscroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+thead th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:11px 13px;
+  font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;
+  border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+thead th.num{text-align:right}
+thead th:hover{color:var(--accent)}
+thead th .arr{opacity:.4;font-size:10px}
+thead th.sorted .arr{opacity:1;color:var(--accent)}
+tbody td{padding:10px 13px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr.base-row{background:var(--accent-wash)}
+tbody tr.base-row:hover{background:var(--accent-wash)}
+.tag-base{font-size:10px;font-weight:700;color:var(--accent-ink);background:var(--surface);border:1px solid var(--accent);
+  padding:1px 6px;border-radius:10px;margin-left:7px;letter-spacing:.03em}
+.total-cell{font-weight:700;font-size:14px}
+.delta{font-family:var(--mono);font-weight:600;font-size:12.5px}
+.delta.pos{color:var(--gain)} .delta.neg{color:var(--loss)} .delta.zero{color:var(--faint)}
+.tbar{display:inline-block;height:7px;border-radius:4px;vertical-align:middle;background:var(--accent);opacity:.85;min-width:2px}
+.tbar.b0{background:var(--faint)}
+td .valchip{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+
+.subhead{grid-column:1/-1;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);
+  font-weight:700;padding:7px 13px;background:var(--surface-2)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:3px;flex:none}
+
+details.ref{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+details.ref > summary{padding:15px 18px;font-family:var(--display);font-weight:700;font-size:15px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}
+details.ref > summary::-webkit-details-marker{display:none}
+details.ref > summary .tw{margin-left:auto;color:var(--faint);transition:.2s}
+details.ref[open] > summary .tw{transform:rotate(180deg)}
+.ref-body{padding:0 18px 20px}
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.ref-card h3{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.ref-card table{font-size:12px}
+.ref-card td,.ref-card th{padding:5px 8px;border-bottom:1px solid var(--line-2)}
+.ref-card th{color:var(--faint);text-transform:uppercase;font-size:10px;letter-spacing:.04em}
+.tiny{font-size:12px;color:var(--muted);line-height:1.5}
+.warn{background:var(--loss-wash);border:1px solid var(--loss);color:var(--loss);border-radius:var(--radius-sm);
+  padding:10px 13px;font-size:12.5px;margin-bottom:14px;display:none}
+.warn.show{display:block}
+footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;line-height:1.6}
+.iconbtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);
+  display:grid;place-items:center;color:var(--muted)}
+.iconbtn:hover{color:var(--accent);border-color:var(--accent)}
+.iconbtn svg{width:17px;height:17px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.overlay{position:fixed;inset:0;background:rgba(16,24,40,.55);display:grid;place-items:center;z-index:50;padding:20px}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  width:min(760px,100%);max-height:82vh;display:flex;flex-direction:column}
+.modal-h{padding:15px 18px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:12px}
+.modal-h h3{font-size:15px;font-weight:700}
+.modal-h .btn{margin-left:auto}
+.modal-b{padding:16px 18px;overflow:auto}
+#csvText{width:100%;height:340px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);
+  border-radius:var(--radius-sm);padding:12px;background:var(--surface-2);color:var(--ink);resize:vertical;white-space:pre}
+.modal-tip{font-size:12px;color:var(--muted);margin:0 0 10px}
+/* ---- how-to-use guide ---- */
+.guide{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.guide > summary{list-style:none;cursor:pointer;padding:15px 18px;display:flex;align-items:center;gap:11px}
+.guide > summary::-webkit-details-marker{display:none}
+.guide > summary .gtitle{font-family:var(--display);font-weight:700;font-size:15px}
+.guide > summary .gkick{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.guide > summary .tw{margin-left:auto;color:var(--faint);transition:.2s}
+.guide[open] > summary .tw{transform:rotate(180deg)}
+.guide[open] > summary{border-bottom:1px solid var(--line-2)}
+.guide-body{padding:18px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.steps{grid-template-columns:1fr}}
+.step{border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:14px 15px;background:var(--surface)}
+.step .n{width:26px;height:26px;border-radius:7px;background:var(--accent-wash);color:var(--accent-ink);
+  font-family:var(--display);font-weight:800;font-size:14px;display:grid;place-items:center;margin-bottom:9px}
+.step h4{font-family:var(--display);font-size:14px;margin:0 0 5px;font-weight:700}
+.step p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.step p b{color:var(--ink);font-weight:600}
+.guide-eg{margin-top:14px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:13px 15px;font-size:13px;color:var(--ink);line-height:1.55}
+.guide-eg .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:5px}
+.guide-tips{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.guide-tips li{font-size:12.5px;color:var(--muted);line-height:1.5;padding-left:20px;position:relative}
+.guide-tips li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.guide-tips li b{color:var(--ink);font-weight:600}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">CRS</div>
+      <div>
+        <h1>CRS Scenario Lab</h1>
+        <div class="sub">Express Entry Comprehensive Ranking System &mdash; vary factors, compare scores side by side</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="iconbtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6L4.5 4.5M18 18l1.5 1.5M6 18l-1.5 1.5M18 6l1.5-1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="4"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="note">
+      <span class="chip-note"><span class="dot"></span>Engine verified against the official IRCC calculator on <b>5,000+</b> random profiles</span>
+      <span class="chip-note"><b>Scored /1,200</b> &middot; rules current to 2026</span>
+      <span class="chip-note">Job offer points <b>= 0</b> (removed 25 Mar 2025)</span>
+    </div>
+  </header>
+
+  <details class="guide" open>
+    <summary><span class="gkick">Start here</span><span class="gtitle">How to use this tool</span><span class="tw">▾</span></summary>
+    <div class="guide-body">
+      <div class="steps">
+        <div class="step">
+          <div class="n">1</div>
+          <h4>Set your baseline</h4>
+          <p>On the left, under <b>Held constant</b>, set every answer to your situation (age, education, language, work experience, and so on). The big number is your baseline CRS score, with its breakdown below it. This is the profile every scenario starts from.</p>
+        </div>
+        <div class="step">
+          <div class="n">2</div>
+          <h4>Choose what to vary</h4>
+          <p>In <b>Step 2 — Factors to vary</b>, flip on any factor you want to test, then tick which values to include (for example Age &rarr; 28, 29, 30, 31, 32). Anything left off keeps its baseline value. Turn on several factors to compare every combination at once.</p>
+        </div>
+        <div class="step">
+          <div class="n">3</div>
+          <h4>Compare the results</h4>
+          <p>The table builds one row per combination, showing the <b>total CRS</b>, the <b>change vs. your baseline</b>, and every sub-score. Click any column heading to sort, and use <b>Export CSV</b> to copy the results into Excel or Google Sheets.</p>
+        </div>
+      </div>
+      <div class="guide-eg">
+        <div class="lab">Example</div>
+        “Does one more year of Canadian work experience beat improving my French?” Set your baseline, turn on <b>Canadian work experience</b> and <b>Second language — CLB</b>, tick the values you're weighing, and read the two effects side by side in the table.
+      </div>
+      <ul class="guide-tips">
+        <li><b>Bringing a spouse can lower your score</b> — switch <b>Application type</b> to “With accompanying spouse” to see it; your own core points drop, and the spouse's own credentials have to make up the difference.</li>
+        <li><b>Provincial nomination adds 600 points</b> — turn it on to see the effect an invitation from a province would have.</li>
+        <li>Your setup is <b>saved in this browser</b>, so it's still here when you come back. Use <b>Reset variations</b> to clear the factors you're varying.</li>
+        <li>Scores mirror the official IRCC calculator, but this is a planning tool — <b>confirm any real application</b> against the official calculator.</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="grid">
+    <!-- ============ LEFT RAIL ============ -->
+    <div class="rail">
+      <section class="panel">
+        <div class="panel-h"><span class="kick">Step 1</span><h2>Baseline profile</h2></div>
+        <div class="panel-b">
+          <div class="score-hero">
+            <div class="big mono" id="baseScore">—</div>
+            <div class="of">/ 1200</div>
+            <div class="lab">Baseline<br>score</div>
+          </div>
+          <div class="bar-mini"><span id="baseBar" style="width:0%"></span></div>
+          <div class="bd" id="baseBreak"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-h"><span class="kick">Inputs</span><h2>Held constant</h2></div>
+        <div class="panel-b" id="baseForm"></div>
+      </section>
+    </div>
+
+    <!-- ============ RIGHT: VARIABLES + RESULTS ============ -->
+    <div style="display:flex;flex-direction:column;gap:22px">
+      <section class="panel">
+        <div class="panel-h"><span class="kick">Step 2</span><h2>Factors to vary</h2>
+          <button class="btn ghost" id="clearVars" style="margin-left:auto;font-size:12px;padding:4px 8px">Reset variations</button>
+        </div>
+        <div class="panel-b">
+          <p class="vhint">Turn on the factors you want to sweep and pick which values to include (for example, <b>Age</b> &rarr; 28, 29, 30, 31, 32). Everything left off keeps its baseline value. The lab builds one scenario per combination.</p>
+          <div id="varList"></div>
+        </div>
+      </section>
+
+      <div class="warn" id="warnBox"></div>
+
+      <section>
+        <div class="results-h">
+          <h2>Scenario comparison</h2>
+          <span class="count" id="scenCount">—</span>
+          <div class="right">
+            <button class="btn" id="csvBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Export CSV</button>
+          </div>
+        </div>
+        <div class="summary" id="summary"></div>
+        <div class="tablewrap">
+          <div class="tscroll"><table id="rtable"><thead></thead><tbody></tbody></table></div>
+        </div>
+        <div class="legend">
+          <span><span class="sw" style="background:var(--accent)"></span>Total CRS (bar scaled across scenarios)</span>
+          <span><span class="sw" style="background:var(--gain)"></span>Gain vs baseline</span>
+          <span><span class="sw" style="background:var(--loss)"></span>Loss vs baseline</span>
+          <span>Click any column header to sort</span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <details class="ref">
+    <summary>Point tables &amp; how the score is built<span class="tw">▾</span></summary>
+    <div class="ref-body">
+      <p class="tiny" style="margin:0 0 16px">Total CRS = <b>Core / human-capital</b> (age, education, official languages, Canadian work experience) + <b>Spouse factors</b> + <b>Skill transferability</b> (education&times;language, education&times;Canadian experience, foreign experience&times;language/Canadian experience, certificate of qualification) + <b>Additional points</b>. Columns marked “with spouse” apply when an accompanying spouse is included; that path lowers the core caps but adds up to 40 spouse points.</p>
+      <div class="ref-grid" id="refGrid"></div>
+      <p class="tiny" style="margin:16px 0 0">Notable rules the tool reproduces: language points depend on CLB level, not the specific test (with one exception — TCF Canada at CLB 4 scores 0 for the first language). The <b>French bonus</b> pays 50 only when English is the <em>first</em> language at CLB 5+ and French is second at CLB 7+; French as the first language pays 25. <b>Arranged-employment / job-offer</b> points are 0 since 25 March 2025.</p>
+    </div>
+  </details>
+
+  <footer>
+    <b>CRS Scenario Lab.</b> An independent analysis tool that reproduces the Government of Canada Express Entry CRS calculator. Not affiliated with or endorsed by the Government of Canada or IRCC. Scores are estimates for planning and comparison; confirm any real application against the official calculator. Point rules current to 2026.
+  </footer>
+</div>
+
+<div class="overlay" id="csvOverlay" hidden>
+  <div class="modal">
+    <div class="modal-h">
+      <h3>Export scenarios (CSV)</h3>
+      <button class="btn primary" id="csvCopy">Copy to clipboard</button>
+      <button class="btn" id="csvClose">Close</button>
+    </div>
+    <div class="modal-b">
+      <p class="modal-tip">Copy the text below and paste it into Excel, Google Sheets or Numbers (it's comma-separated). One row per scenario, with the varied factors, total CRS, delta vs baseline and every sub-score.</p>
+      <textarea id="csvText" readonly spellcheck="false"></textarea>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="crs-rules">
+{
+  "meta": {
+    "name": "Express Entry CRS rules",
+    "version": "1.0.0",
+    "source": "Government of Canada / IRCC \u2014 Express Entry CRS calculator (check-score) and CRS criteria page",
+    "rules_current_to": "2026",
+    "last_verified": "2026-09",
+    "verification": "Reconstructed engine matched the official IRCC calculator on 5,073 random full profiles (exact on grand total and all sub-scores).",
+    "notes": [
+      "Job offer / arranged employment points were removed on 2025-03-25 (now 0).",
+      "TCF Canada at CLB 4 scores 0 for the first official language (tool quirk).",
+      "French bonus pays 50 only when English is the FIRST language at CLB 5+ and French is second at CLB 7+; otherwise 25. PTE Core used as the SECOND language never reaches the 50 tier (tool quirk)."
+    ]
+  },
+  "clb": {
+    "H": 10,
+    "G": 9,
+    "F": 8,
+    "E": 7,
+    "D": 6,
+    "C": 5,
+    "B": 4,
+    "A": 0
+  },
+  "age": {
+    "A": [
+      0,
+      0
+    ],
+    "B": [
+      90,
+      99
+    ],
+    "C": [
+      95,
+      105
+    ],
+    "D": [
+      100,
+      110
+    ],
+    "E": [
+      100,
+      110
+    ],
+    "F": [
+      100,
+      110
+    ],
+    "G": [
+      100,
+      110
+    ],
+    "H": [
+      100,
+      110
+    ],
+    "I": [
+      100,
+      110
+    ],
+    "J": [
+      100,
+      110
+    ],
+    "K": [
+      100,
+      110
+    ],
+    "L": [
+      100,
+      110
+    ],
+    "M": [
+      100,
+      110
+    ],
+    "N": [
+      95,
+      105
+    ],
+    "O": [
+      90,
+      99
+    ],
+    "P": [
+      85,
+      94
+    ],
+    "Q": [
+      80,
+      88
+    ],
+    "R": [
+      75,
+      83
+    ],
+    "S": [
+      70,
+      77
+    ],
+    "T": [
+      65,
+      72
+    ],
+    "U": [
+      60,
+      66
+    ],
+    "V": [
+      55,
+      61
+    ],
+    "W": [
+      50,
+      55
+    ],
+    "X": [
+      45,
+      50
+    ],
+    "Y": [
+      35,
+      39
+    ],
+    "Z": [
+      25,
+      28
+    ],
+    "AA": [
+      15,
+      17
+    ],
+    "AB": [
+      5,
+      6
+    ],
+    "AC": [
+      0,
+      0
+    ]
+  },
+  "education": {
+    "A": [
+      0,
+      0
+    ],
+    "B": [
+      28,
+      30
+    ],
+    "C": [
+      84,
+      90
+    ],
+    "D": [
+      91,
+      98
+    ],
+    "E": [
+      112,
+      120
+    ],
+    "F": [
+      119,
+      128
+    ],
+    "G": [
+      126,
+      135
+    ],
+    "H": [
+      140,
+      150
+    ]
+  },
+  "first_official_language_per_ability": {
+    "H": [
+      32,
+      34
+    ],
+    "G": [
+      29,
+      31
+    ],
+    "F": [
+      22,
+      23
+    ],
+    "E": [
+      16,
+      17
+    ],
+    "D": [
+      8,
+      9
+    ],
+    "C": [
+      6,
+      6
+    ],
+    "B": [
+      6,
+      6
+    ],
+    "A": [
+      0,
+      0
+    ]
+  },
+  "second_official_language_per_ability": {
+    "H": [
+      6,
+      6
+    ],
+    "G": [
+      6,
+      6
+    ],
+    "F": [
+      3,
+      3
+    ],
+    "E": [
+      3,
+      3
+    ],
+    "D": [
+      1,
+      1
+    ],
+    "C": [
+      1,
+      1
+    ],
+    "B": [
+      0,
+      0
+    ],
+    "A": [
+      0,
+      0
+    ]
+  },
+  "spouse_language_per_ability": {
+    "H": 5,
+    "G": 5,
+    "F": 3,
+    "E": 3,
+    "D": 1,
+    "C": 1,
+    "B": 0,
+    "A": 0
+  },
+  "canadian_work_experience": {
+    "A": [
+      0,
+      0
+    ],
+    "B": [
+      35,
+      40
+    ],
+    "C": [
+      46,
+      53
+    ],
+    "D": [
+      56,
+      64
+    ],
+    "E": [
+      63,
+      72
+    ],
+    "F": [
+      70,
+      80
+    ]
+  },
+  "spouse_education": {
+    "A": 0,
+    "B": 2,
+    "C": 6,
+    "D": 7,
+    "E": 8,
+    "F": 9,
+    "G": 10,
+    "H": 10
+  },
+  "spouse_canadian_experience": {
+    "A": 0,
+    "B": 5,
+    "C": 7,
+    "D": 8,
+    "E": 9,
+    "F": 10
+  },
+  "caps": {
+    "second_lang_with_spouse": 22,
+    "second_lang_without_spouse": 24,
+    "skill_transferability_total": 100,
+    "additional_total": 600,
+    "spouse_language_total": 20,
+    "grand_total": 1200
+  },
+  "study_bonus": {
+    "none": 0,
+    "secondary": 0,
+    "one_or_two_year": 15,
+    "three_year_plus": 30
+  },
+  "additional": {
+    "provincial_nomination": 600,
+    "sibling_in_canada": 15,
+    "french_with_english_clb5": 50,
+    "french_only": 25,
+    "job_offer": 0
+  },
+  "skill_transferability": {
+    "education_tier2_levels": [
+      "F",
+      "G",
+      "H"
+    ],
+    "education_tier0_levels": [
+      "A",
+      "B"
+    ],
+    "_comment": "size-tier -> [half, full]. Education buckets use the education tier; foreign-experience buckets use the foreign level. half = CLB7-8 or 1yr Cdn / 1-2yr foreign; full = CLB9+ or 2yr+ Cdn / 3yr+ foreign.",
+    "points_by_tier": {
+      "1": [
+        13,
+        25
+      ],
+      "2": [
+        25,
+        50
+      ]
+    },
+    "certificate": {
+      "clb5": 25,
+      "clb7": 50
+    }
+  }
+}
+</script>
+<script>
+/*
+ * CRS scoring engine — canonical implementation.
+ * Pure function of a RULES object (see data/crs-rules.json), so updating the
+ * point tables never touches this logic. Verified against the official IRCC
+ * calculator on 5,073 random full profiles (exact on total and all sub-scores).
+ *
+ * Works in the browser (window.CRSEngine) and Node (module.exports).
+ */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.CRSEngine = factory();
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+  var ABIL = ["speaking", "listening", "reading", "writing"];
+  var FRENCH = { C: 1, D: 1 }; // first-language test codes that are French (TEF, TCF)
+
+  function createEngine(R) {
+    var clb = R.clb;
+    var minCLB = function (vals) {
+      var m = Infinity;
+      for (var i = 0; i < vals.length; i++) { var c = clb[vals[i]] || 0; if (c < m) m = c; }
+      return m;
+    };
+    // first-language points per ability, honouring the TCF-at-CLB4 quirk
+    var fol = function (test, v, ws) {
+      if (test === "D" && v === "B") return 0;
+      return R.first_official_language_per_ability[v][ws ? 0 : 1];
+    };
+
+    // Complete a partial profile with safe defaults (every field present).
+    var DEFAULTS = {
+      q1: "F", q2i: "A", q2ii: "A", q3: "M", q4: "E", q4b: "A", q4c: "A", q5i: "A", "q5i-a": "B",
+      "q5i-b-speaking": "A", "q5i-b-listening": "A", "q5i-b-reading": "A", "q5i-b-writing": "A",
+      q5ii: "C", "q5ii-sol-speaking": "A", "q5ii-sol-listening": "A", "q5ii-sol-reading": "A", "q5ii-sol-writing": "A",
+      q6i: "A", q6ii: "A", q7: "A", q8: "A", q8a: "A", q9: "A", q10i: "A",
+      q10: "A", q11: "A", q12i: "F", "q12ii-fol-speaking": "A", "q12ii-fol-listening": "A", "q12ii-fol-reading": "A", "q12ii-fol-writing": "A"
+    };
+    function full(p) { var d = {}, k; for (k in DEFAULTS) d[k] = DEFAULTS[k]; for (k in p) d[k] = p[k]; return d; }
+
+    function score(p) {
+      var g = function (k) { return p[k]; };
+      var married = g("q1") === "B" || g("q1") === "E";
+      var ws = married && g("q2i") === "A" && g("q2ii") === "B";
+      var R2 = {};
+      R2.core_age = R.age[g("q3")][ws ? 0 : 1];
+      R2.core_education = R.education[g("q4")][ws ? 0 : 1];
+      var t1 = g("q5i-a");
+      var v1 = ABIL.map(function (a) { return g("q5i-b-" + a); });
+      R2.core_lang_first = v1.reduce(function (s, v) { return s + fol(t1, v, ws); }, 0);
+      var hasSecond = g("q5ii") && g("q5ii") !== "C";
+      var v2 = ABIL.map(function (a) { return g("q5ii-sol-" + a) || "A"; });
+      var sec = 0;
+      if (hasSecond) {
+        sec = v2.reduce(function (s, v) { return s + R.second_official_language_per_ability[v][ws ? 0 : 1]; }, 0);
+        sec = Math.min(ws ? R.caps.second_lang_with_spouse : R.caps.second_lang_without_spouse, sec);
+      }
+      R2.core_lang_second = sec;
+      R2.core_lang_total = R2.core_lang_first + R2.core_lang_second;
+      R2.core_cdn_exp = R.canadian_work_experience[g("q6i")][ws ? 0 : 1];
+      R2.core_subtotal = R2.core_age + R2.core_education + R2.core_lang_total + R2.core_cdn_exp;
+
+      var se = 0, sl = 0, sc = 0;
+      if (ws) {
+        se = R.spouse_education[g("q10")] || 0;
+        sc = R.spouse_canadian_experience[g("q11")] || 0;
+        if (g("q12i") && g("q12i") !== "F") {
+          sl = Math.min(R.caps.spouse_language_total, ABIL.reduce(function (s, a) {
+            return s + (R.spouse_language_per_ability[g("q12ii-fol-" + a) || "A"] || 0);
+          }, 0));
+        }
+      }
+      R2.spouse_education = se; R2.spouse_lang = sl; R2.spouse_cdn_exp = sc; R2.spouse_subtotal = se + sl + sc;
+
+      // ---- skill transferability ----
+      var T = R.skill_transferability;
+      var eduTier = T.education_tier0_levels.indexOf(g("q4")) >= 0 ? 0
+        : (T.education_tier2_levels.indexOf(g("q4")) >= 0 ? 2 : 1);
+      var pts = function (tier) { return T.points_by_tier[String(tier)]; }; // [half, full]
+      var c9 = minCLB(v1) >= 9, c7 = minCLB(v1) >= 7, c5 = minCLB(v1) >= 5;
+      var eL = 0; if (eduTier > 0) { if (c9) eL = pts(eduTier)[1]; else if (c7) eL = pts(eduTier)[0]; }
+      var cdnLvl = g("q6i") === "A" ? 0 : (g("q6i") === "B" ? 1 : 2);
+      var eC = 0; if (eduTier > 0) { if (cdnLvl === 2) eC = pts(eduTier)[1]; else if (cdnLvl === 1) eC = pts(eduTier)[0]; }
+      var eduSub = Math.min(50, eL + eC);
+      var fLvl = g("q6ii") === "A" ? 0 : (g("q6ii") === "D" ? 2 : 1);
+      var fL = 0; if (fLvl > 0) { if (c9) fL = pts(fLvl)[1]; else if (c7) fL = pts(fLvl)[0]; }
+      var fC = 0; if (fLvl > 0) { if (cdnLvl === 2) fC = pts(fLvl)[1]; else if (cdnLvl === 1) fC = pts(fLvl)[0]; }
+      var forSub = Math.min(50, fL + fC);
+      var cert = 0; if (g("q7") === "B") { cert = c7 ? T.certificate.clb7 : (c5 ? T.certificate.clb5 : 0); }
+      R2.st_lang_education = eL; R2.st_cdnexp_education = eC; R2.st_edu_subtotal = eduSub;
+      R2.st_lang_foreignexp = fL; R2.st_cdn_foreign = fC; R2.st_foreign_subtotal = forSub; R2.st_cert = cert;
+      R2.st_subtotal = Math.min(R.caps.skill_transferability_total, eduSub + forSub + cert);
+
+      // ---- additional ----
+      var studyMap = { A: R.study_bonus.secondary, B: R.study_bonus.one_or_two_year, C: R.study_bonus.three_year_plus };
+      var study = g("q4b") === "B" ? (studyMap[g("q4c")] || 0) : 0;
+      var pnp = g("q9") === "B" ? R.additional.provincial_nomination : 0;
+      var sib = g("q10i") === "B" ? R.additional.sibling_in_canada : 0;
+      var firstIsFrench = !!FRENCH[t1], frenchMin = null, englishMin = null, pteSecond = false;
+      if (firstIsFrench) { frenchMin = minCLB(v1); if (hasSecond) { englishMin = minCLB(v2); if (g("q5ii") === "E") pteSecond = true; } }
+      else { englishMin = minCLB(v1); if (hasSecond) frenchMin = minCLB(v2); }
+      var french = 0;
+      if (frenchMin != null && frenchMin >= 7) {
+        var eq = (englishMin != null && englishMin >= 5) && !pteSecond;
+        french = eq ? R.additional.french_with_english_clb5 : R.additional.french_only;
+      }
+      R2.add_pnp = pnp; R2.add_study = study; R2.add_sibling = sib; R2.add_french = french;
+      R2.add_subtotal = Math.min(R.caps.additional_total, pnp + study + sib + french);
+
+      R2.GRAND_TOTAL = Math.min(R.caps.grand_total,
+        R2.core_subtotal + R2.spouse_subtotal + R2.st_subtotal + R2.add_subtotal);
+      return R2;
+    }
+
+    return { score: score, full: full, rules: R, ABIL: ABIL };
+  }
+
+  return { createEngine: createEngine };
+});
+</script>
+<script>
+/* ============================================================
+   ENGINE WIRING
+   Rules come from the inline <script id="crs-rules"> block (generated from
+   data/crs-rules.json by scripts/build.py). The engine is engine/crs-engine.js.
+   To change points/rules: edit data/crs-rules.json, then run scripts/build.py.
+   ============================================================ */
+const RULES = JSON.parse(document.getElementById('crs-rules').textContent);
+const ENG = CRSEngine.createEngine(RULES);
+const scoreCRS = ENG.score;
+const fullProfile = ENG.full;
+const ABIL = ENG.ABIL;
+
+/* ============================================================
+   FRIENDLY MODEL  ->  field profile
+   ============================================================ */
+const CLB_OPTS=[['H','CLB 10+'],['G','CLB 9'],['F','CLB 8'],['E','CLB 7'],['D','CLB 6'],['C','CLB 5'],['B','CLB 4'],['A','CLB 3 or less']];
+const AGE_OPTS=[['A','17 or under'],['B','18'],['C','19'],['D','20'],['E','21'],['F','22'],['G','23'],['H','24'],['I','25'],['J','26'],['K','27'],['L','28'],['M','29'],['N','30'],['O','31'],['P','32'],['Q','33'],['R','34'],['S','35'],['T','36'],['U','37'],['V','38'],['W','39'],['X','40'],['Y','41'],['Z','42'],['AA','43'],['AB','44'],['AC','45+']];
+const EDU_OPTS=[['A','None / < secondary'],['B','Secondary diploma'],['C','1-year post-secondary'],['D','2-year post-secondary'],['E','Bachelor / 3-year+'],['F','Two+ credentials (one 3-yr+)'],['G','Master / professional'],['H','Doctoral (PhD)']];
+const CDNEXP_OPTS=[['A','None / < 1 yr'],['B','1 year'],['C','2 years'],['D','3 years'],['E','4 years'],['F','5 years+']];
+const FOREIGN_OPTS=[['A','None / < 1 yr'],['B','1 year'],['C','2 years'],['D','3 years+']];
+const STUDY_OPTS=[['none','None'],['sec','Secondary in Canada'],['s12','1–2 yr in Canada (+15)'],['s3','3 yr+ in Canada (+30)']];
+const YESNO=[['A','No'],['B','Yes']];
+const JOB_OPTS=[['A','No offer'],['00','NOC TEER 00'],['0123','TEER 0/1/2/3'],['45','TEER 4/5']];
+const LANG1TYPE=[['B','English — IELTS'],['A','English — CELPIP'],['E','English — PTE Core'],['C','French — TEF Canada'],['D','French — TCF Canada']];
+const SPLANG_OPTS=[['none','No test / none']].concat(CLB_OPTS.map(o=>[o[0],'2nd-lang '+o[1]]));
+
+/* baseline friendly state (opens with a realistic profile) */
+const state={
+  spouse:false,
+  age:'M', edu:'E', study:'none',
+  l1type:'B', l1clb:'G',
+  l2clb:'none',
+  cdnexp:'B', foreign:'A',
+  cert:'A', pnp:'A', sibling:'A', job:'A',
+  spEdu:'A', spLang:'none', spExp:'A'
+};
+
+function buildProfile(s){
+  const p={};
+  if(s.spouse){ p.q1='E'; p.q2i='A'; p.q2ii='B'; } else { p.q1='F'; }
+  p.q3=s.age; p.q4=s.edu;
+  if(s.study==='none'){p.q4b='A';} else if(s.study==='sec'){p.q4b='B';p.q4c='A';}
+  else if(s.study==='s12'){p.q4b='B';p.q4c='B';} else if(s.study==='s3'){p.q4b='B';p.q4c='C';}
+  p.q5i='A'; p['q5i-a']=s.l1type;
+  ABIL.forEach(a=>p['q5i-b-'+a]=s.l1clb);
+  if(s.l2clb==='none'){ p.q5ii='C'; }
+  else { p.q5ii='A'; ABIL.forEach(a=>p['q5ii-sol-'+a]=s.l2clb); }
+  p.q6i=s.cdnexp; p.q6ii=s.foreign; p.q7=s.cert; p.q9=s.pnp; p.q10i=s.sibling;
+  if(s.job==='A'){p.q8='A';} else {p.q8='B'; p.q8a=(s.job==='00'?'A':s.job==='0123'?'B':'C');}
+  if(s.spouse){ p.q10=s.spEdu; p.q11=s.spExp;
+    if(s.spLang==='none'){p.q12i='F';} else {p.q12i='A'; ABIL.forEach(a=>p['q12ii-fol-'+a]=s.spLang);} }
+  return fullProfile(p);
+}
+
+/* ============================================================
+   FACTOR DEFINITIONS (drive baseline form + vary panel + table)
+   ============================================================ */
+const FACTORS=[
+  {key:'spouse',   name:'Application type',        group:'Core',     opts:[['0','Just me (no spouse)'],['1','With accompanying spouse']], get:s=>s.spouse?'1':'0', set:(s,v)=>s.spouse=(v==='1'), label:v=>v==='1'?'With spouse':'Just me'},
+  {key:'age',      name:'Age',                     group:'Core',     opts:AGE_OPTS, get:s=>s.age, set:(s,v)=>s.age=v},
+  {key:'edu',      name:'Education level',         group:'Core',     opts:EDU_OPTS, get:s=>s.edu, set:(s,v)=>s.edu=v},
+  {key:'l1type',   name:'First language — test',   group:'Language', opts:LANG1TYPE, get:s=>s.l1type, set:(s,v)=>s.l1type=v},
+  {key:'l1clb',    name:'First language — CLB',    group:'Language', opts:CLB_OPTS, get:s=>s.l1clb, set:(s,v)=>s.l1clb=v},
+  {key:'l2clb',    name:'Second language — CLB',   group:'Language', opts:[['none','None']].concat(CLB_OPTS), get:s=>s.l2clb, set:(s,v)=>s.l2clb=v},
+  {key:'cdnexp',   name:'Canadian work experience',group:'Experience',opts:CDNEXP_OPTS, get:s=>s.cdnexp, set:(s,v)=>s.cdnexp=v},
+  {key:'foreign',  name:'Foreign work experience', group:'Experience',opts:FOREIGN_OPTS, get:s=>s.foreign, set:(s,v)=>s.foreign=v},
+  {key:'study',    name:'Study in Canada',         group:'Additional',opts:STUDY_OPTS, get:s=>s.study, set:(s,v)=>s.study=v},
+  {key:'cert',     name:'Certificate of qualification',group:'Additional',opts:YESNO, get:s=>s.cert, set:(s,v)=>s.cert=v},
+  {key:'sibling',  name:'Sibling in Canada',       group:'Additional',opts:YESNO, get:s=>s.sibling, set:(s,v)=>s.sibling=v},
+  {key:'pnp',      name:'Provincial nomination',   group:'Additional',opts:YESNO, get:s=>s.pnp, set:(s,v)=>s.pnp=v},
+  {key:'job',      name:'Job offer (0 pts)',       group:'Additional',opts:JOB_OPTS, get:s=>s.job, set:(s,v)=>s.job=v},
+  {key:'spEdu',    name:'Spouse — education',      group:'Spouse',   spouseOnly:true, opts:EDU_OPTS, get:s=>s.spEdu, set:(s,v)=>s.spEdu=v},
+  {key:'spLang',   name:'Spouse — language CLB',   group:'Spouse',   spouseOnly:true, opts:[['none','None']].concat(CLB_OPTS), get:s=>s.spLang, set:(s,v)=>s.spLang=v},
+  {key:'spExp',    name:'Spouse — Canadian experience',group:'Spouse',spouseOnly:true, opts:CDNEXP_OPTS, get:s=>s.spExp, set:(s,v)=>s.spExp=v}
+];
+const FMAP={}; FACTORS.forEach(f=>FMAP[f.key]=f);
+function optLabel(f,v){ const o=f.opts.find(x=>x[0]===v); return o?o[1]:v; }
+
+/* which factors are varying -> {key:Set(values)} */
+const vary={};
+
+/* ============================================================
+   RENDER: baseline form
+   ============================================================ */
+const baseForm=document.getElementById('baseForm');
+function renderForm(){
+  baseForm.innerHTML='';
+  let curGroup=null;
+  FACTORS.forEach(f=>{
+    if(f.spouseOnly && !state.spouse) return;
+    if(f.group!==curGroup){ curGroup=f.group;
+      const gl=document.createElement('div'); gl.className='glabel'; gl.textContent=f.group; baseForm.appendChild(gl); }
+    const field=document.createElement('div'); field.className='field';
+    const lab=document.createElement('label'); lab.textContent=f.name; lab.htmlFor='b_'+f.key;
+    const sel=document.createElement('select'); sel.className='ctl'; sel.id='b_'+f.key;
+    f.opts.forEach(o=>{ const op=document.createElement('option'); op.value=o[0]; op.textContent=o[1]; sel.appendChild(op); });
+    sel.value=f.get(state);
+    sel.addEventListener('change',()=>{ f.set(state,sel.value);
+      if(f.key==='spouse'){ renderForm(); renderVars(); }
+      recompute(); });
+    field.appendChild(lab); field.appendChild(sel); baseForm.appendChild(field);
+  });
+}
+
+/* ============================================================
+   RENDER: variable picker
+   ============================================================ */
+const varList=document.getElementById('varList');
+function renderVars(){
+  varList.innerHTML='';
+  let curGroup=null;
+  FACTORS.forEach(f=>{
+    if(f.spouseOnly && !state.spouse){ delete vary[f.key]; return; }
+    if(f.group!==curGroup){ curGroup=f.group;
+      const gl=document.createElement('div'); gl.className='glabel'; gl.textContent=f.group; varList.appendChild(gl); }
+    const on=!!vary[f.key];
+    const box=document.createElement('div'); box.className='var'+(on?' on':'');
+    const h=document.createElement('div'); h.className='var-h';
+    const sw=document.createElement('label'); sw.className='switch';
+    sw.innerHTML='<input type="checkbox" '+(on?'checked':'')+' aria-label="Vary '+f.name+'"><span class="slider"></span>';
+    sw.querySelector('input').addEventListener('change',e=>{
+      if(e.target.checked){ vary[f.key]=new Set([f.get(state)]); } else { delete vary[f.key]; }
+      renderVars(); recompute();
+    });
+    const nm=document.createElement('div'); nm.className='vname'; nm.textContent=f.name;
+    const base=document.createElement('div'); base.className='vbase'; base.textContent=optLabel(f,f.get(state));
+    h.appendChild(sw); h.appendChild(nm); h.appendChild(base); box.appendChild(h);
+    const body=document.createElement('div'); body.className='var-body';
+    if(on){
+      const tools=document.createElement('div'); tools.className='var-tools';
+      const all=document.createElement('button'); all.textContent='Select all';
+      all.onclick=()=>{ vary[f.key]=new Set(f.opts.map(o=>o[0])); renderVars(); recompute(); };
+      const none=document.createElement('button'); none.textContent='Clear';
+      none.onclick=()=>{ vary[f.key]=new Set(); renderVars(); recompute(); };
+      tools.appendChild(all); tools.appendChild(none); body.appendChild(tools);
+      f.opts.forEach(o=>{
+        const chip=document.createElement('span');
+        const isCLB=/CLB|year|TEER/.test(o[1]);
+        chip.className='opt'+(isCLB?' mini':'')+(vary[f.key].has(o[0])?' sel':'');
+        chip.textContent=o[1];
+        chip.onclick=()=>{ const set=vary[f.key]; if(set.has(o[0]))set.delete(o[0]); else set.add(o[0]); renderVars(); recompute(); };
+        body.appendChild(chip);
+      });
+    }
+    box.appendChild(body); varList.appendChild(box);
+  });
+}
+
+/* ============================================================
+   COMPUTE + RENDER results
+   ============================================================ */
+const SUBCOLS=[
+  ['core_age','Age'],['core_education','Educ.'],['core_lang_first','Lang 1'],['core_lang_second','Lang 2'],
+  ['core_cdn_exp','Cdn exp'],['spouse_subtotal','Spouse'],['st_subtotal','Skill trans.'],['add_subtotal','Additional']
+];
+let lastRows=[], lastVaryKeys=[], sortState={col:'GRAND_TOTAL',dir:-1};
+
+function cartesian(keys){
+  let combos=[{}];
+  keys.forEach(k=>{
+    const vals=[...vary[k]]; const next=[];
+    combos.forEach(c=>vals.forEach(v=>{ const n=Object.assign({},c); n[k]=v; next.push(n); }));
+    combos=next;
+  });
+  return combos;
+}
+
+function recompute(){
+  const baseProfile=buildProfile(state);
+  const baseRes=scoreCRS(baseProfile);
+  renderBaseline(baseRes);
+
+  const vkeys=FACTORS.map(f=>f.key).filter(k=>vary[k]&&vary[k].size>0);
+  lastVaryKeys=vkeys;
+  const combos=cartesian(vkeys);
+  const warn=document.getElementById('warnBox');
+  const total=combos.length;
+  const CAP=4000;
+  if(vkeys.some(k=>vary[k].size===0)){}
+  const capped = total>CAP;
+  const use = capped?combos.slice(0,CAP):combos;
+  warn.className='warn'+(capped?' show':'');
+  if(capped) warn.textContent='This combination produces '+total.toLocaleString()+' scenarios. Showing the first '+CAP.toLocaleString()+'. Narrow the values you selected (fewer factors, or fewer values each) for a focused comparison.';
+
+  const rows=use.map(combo=>{
+    const s=Object.assign({},state);
+    Object.keys(combo).forEach(k=>FMAP[k].set(s,combo[k]));
+    const res=scoreCRS(buildProfile(s));
+    return {combo, res, total:res.GRAND_TOTAL, isBase:vkeys.every(k=>combo[k]===FMAP[k].get(state))};
+  });
+  lastRows=rows;
+  renderTable(rows, vkeys, baseRes);
+  renderSummary(rows, baseRes, total, capped);
+  document.getElementById('scenCount').textContent = rows.length.toLocaleString()+(capped?' of '+total.toLocaleString():'')+' scenario'+(rows.length===1?'':'s');
+  saveState();
+}
+
+function renderBaseline(r){
+  document.getElementById('baseScore').textContent=r.GRAND_TOTAL;
+  document.getElementById('baseBar').style.width=Math.min(100,r.GRAND_TOTAL/1200*100)+'%';
+  const rows=[
+    ['Core / human capital',r.core_subtotal],
+    ['Spouse factors',r.spouse_subtotal],
+    ['Skill transferability',r.st_subtotal],
+    ['Additional points',r.add_subtotal]
+  ];
+  const bd=document.getElementById('baseBreak'); bd.innerHTML='';
+  rows.forEach(([n,v])=>{ const d=document.createElement('div'); d.className='row';
+    d.innerHTML='<span class="nm">'+n+'</span><span class="vl">'+v+'</span>'; bd.appendChild(d); });
+  const sum=document.createElement('div'); sum.className='row sum';
+  sum.innerHTML='<span class="nm">Total CRS</span><span class="vl" style="color:var(--accent)">'+r.GRAND_TOTAL+'</span>';
+  bd.appendChild(sum);
+}
+
+function renderSummary(rows, baseRes, total, capped){
+  const wrap=document.getElementById('summary');
+  const totals=rows.map(r=>r.total);
+  const max=Math.max(...totals), min=Math.min(...totals);
+  const base=baseRes.GRAND_TOTAL;
+  const range=max-min;
+  const varNames=lastVaryKeys.map(k=>FMAP[k].name);
+  const stats=[
+    ['Baseline', base, 'accent', '/ 1200'],
+    ['Highest', max, 'gain', (max-base>=0?'+':'')+(max-base)+' vs base'],
+    ['Lowest', min, 'loss', (min-base>=0?'+':'')+(min-base)+' vs base'],
+    ['Spread', range, '', 'max − min'],
+    ['Varying', varNames.length, '', varNames.length? varNames.join(', ').slice(0,42) : 'nothing yet']
+  ];
+  wrap.innerHTML='';
+  stats.forEach(([k,v,cls,s])=>{
+    const d=document.createElement('div'); d.className='stat';
+    d.innerHTML='<div class="k">'+k+'</div><div class="v '+cls+'">'+(typeof v==='number'?v:v)+'</div><div class="s">'+s+'</div>';
+    wrap.appendChild(d);
+  });
+}
+
+function renderTable(rows, vkeys, baseRes){
+  const thead=document.querySelector('#rtable thead');
+  const tbody=document.querySelector('#rtable tbody');
+  const base=baseRes.GRAND_TOTAL;
+  const maxTotal=Math.max(...rows.map(r=>r.total),1);
+  const minTotal=Math.min(...rows.map(r=>r.total));
+
+  // header
+  const cols=[];
+  if(vkeys.length===0) cols.push({id:'__base',label:'Scenario',num:false});
+  vkeys.forEach(k=>cols.push({id:'v_'+k,label:FMAP[k].name,num:false,vkey:k}));
+  cols.push({id:'GRAND_TOTAL',label:'Total CRS',num:true});
+  cols.push({id:'__delta',label:'Δ base',num:true});
+  SUBCOLS.forEach(sc=>cols.push({id:sc[0],label:sc[1],num:true,sub:true}));
+
+  thead.innerHTML='';
+  const tr=document.createElement('tr');
+  cols.forEach(c=>{
+    const th=document.createElement('th'); th.className=(c.num?'num ':'')+(sortState.col===c.id?'sorted':'');
+    th.innerHTML=c.label+' <span class="arr">'+(sortState.col===c.id?(sortState.dir<0?'▼':'▲'):'▲')+'</span>';
+    th.onclick=()=>{ if(sortState.col===c.id) sortState.dir*=-1; else {sortState.col=c.id; sortState.dir=(c.num?-1:1);} renderTable(rows,vkeys,baseRes); };
+    tr.appendChild(th);
+  });
+  thead.appendChild(tr);
+
+  // sort
+  const sorted=rows.slice().sort((a,b)=>{
+    let av,bv;
+    const c=sortState.col;
+    if(c==='GRAND_TOTAL'||c==='__delta'){ av=a.total; bv=b.total; }
+    else if(c.startsWith('v_')){ const k=c.slice(2); av=optLabel(FMAP[k],a.combo[k]); bv=optLabel(FMAP[k],b.combo[k]); }
+    else if(c.startsWith('__')){ av=a.total; bv=b.total; }
+    else { av=a.res[c]||0; bv=b.res[c]||0; }
+    if(typeof av==='string') return sortState.dir*av.localeCompare(bv);
+    return sortState.dir*(av-bv);
+  });
+
+  tbody.innerHTML='';
+  sorted.forEach(r=>{
+    const tr=document.createElement('tr'); if(r.isBase) tr.className='base-row';
+    if(vkeys.length===0){ const td=document.createElement('td'); td.innerHTML='Baseline profile'; tr.appendChild(td); }
+    vkeys.forEach(k=>{ const td=document.createElement('td');
+      td.innerHTML='<span class="valchip">'+optLabel(FMAP[k],r.combo[k])+'</span>'; tr.appendChild(td); });
+    // total + bar
+    const tdT=document.createElement('td'); tdT.className='num';
+    const w=Math.round((r.total-Math.min(minTotal,0))/(maxTotal-Math.min(minTotal,0)||1)*70)+8;
+    tdT.innerHTML='<span class="tbar'+(r.total===0?' b0':'')+'" style="width:'+w+'px"></span> <span class="total-cell">'+r.total+'</span>'+(r.isBase?'<span class="tag-base">BASE</span>':'');
+    tr.appendChild(tdT);
+    // delta
+    const d=r.total-base; const tdD=document.createElement('td'); tdD.className='num';
+    tdD.innerHTML='<span class="delta '+(d>0?'pos':d<0?'neg':'zero')+'">'+(d>0?'+':'')+d+'</span>';
+    tr.appendChild(tdD);
+    SUBCOLS.forEach(sc=>{ const td=document.createElement('td'); td.className='num'; td.textContent=r.res[sc[0]]||0; tr.appendChild(td); });
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---- CSV export ---- */
+function toCSV(){
+  const vkeys=lastVaryKeys;
+  const head=['scenario_index'].concat(vkeys.map(k=>FMAP[k].name))
+    .concat(['total_crs','delta_vs_baseline'])
+    .concat(SUBCOLS.map(s=>s[1]))
+    .concat(['core_subtotal']);
+  const base=scoreCRS(buildProfile(state)).GRAND_TOTAL;
+  const lines=[head.join(',')];
+  lastRows.forEach((r,i)=>{
+    const cells=[i+1].concat(vkeys.map(k=>'"'+optLabel(FMAP[k],r.combo[k]).replace(/"/g,'""')+'"'))
+      .concat([r.total, r.total-base])
+      .concat(SUBCOLS.map(s=>r.res[s[0]]||0))
+      .concat([r.res.core_subtotal]);
+    lines.push(cells.join(','));
+  });
+  return lines.join('\n');
+}
+document.getElementById('csvBtn').onclick=()=>{
+  const csv=toCSV();
+  const ov=document.getElementById('csvOverlay');
+  document.getElementById('csvText').value=csv;
+  ov.hidden=false;
+  const ta=document.getElementById('csvText'); ta.focus(); ta.select();
+};
+document.getElementById('csvClose').onclick=()=>{document.getElementById('csvOverlay').hidden=true;};
+document.getElementById('csvOverlay').addEventListener('click',e=>{ if(e.target.id==='csvOverlay') e.currentTarget.hidden=true; });
+document.getElementById('csvCopy').onclick=async()=>{
+  const btn=document.getElementById('csvCopy'); const t=document.getElementById('csvText').value;
+  try{ await navigator.clipboard.writeText(t); btn.textContent='Copied ✓'; }
+  catch(e){ document.getElementById('csvText').select(); document.execCommand&&document.execCommand('copy'); btn.textContent='Copied ✓'; }
+  setTimeout(()=>btn.textContent='Copy to clipboard',1400);
+};
+
+/* ---- reset ---- */
+document.getElementById('clearVars').onclick=()=>{ Object.keys(vary).forEach(k=>delete vary[k]); renderVars(); recompute(); };
+
+/* ---- theme toggle ---- */
+const root=document.documentElement;
+document.getElementById('themeBtn').onclick=()=>{
+  const cur=root.getAttribute('data-theme');
+  const sysDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const next = cur ? (cur==='dark'?'light':'dark') : (sysDark?'light':'dark');
+  root.setAttribute('data-theme',next);
+  try{localStorage.setItem('crs_theme',next);}catch(e){}
+};
+try{const t=localStorage.getItem('crs_theme'); if(t)root.setAttribute('data-theme',t);}catch(e){}
+
+/* ---- persist config (per-viewer convenience) ---- */
+function saveState(){ try{ localStorage.setItem('crs_state',JSON.stringify(state));
+  localStorage.setItem('crs_vary',JSON.stringify(Object.fromEntries(Object.entries(vary).map(([k,v])=>[k,[...v]])))); }catch(e){} }
+function loadState(){
+  try{
+    const s=JSON.parse(localStorage.getItem('crs_state')||'null'); if(s)Object.assign(state,s);
+    const v=JSON.parse(localStorage.getItem('crs_vary')||'null');
+    if(v)Object.keys(v).forEach(k=>{ if(FMAP[k]) vary[k]=new Set(v[k]); });
+  }catch(e){}
+}
+
+/* ---- reference tables ---- */
+function buildRef(){
+  const grid=document.getElementById('refGrid');
+  const tbl=(title,head,rows)=>{
+    let h='<div class="ref-card"><h3>'+title+'</h3><table><thead><tr>'+head.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>';
+    rows.forEach(r=>{ h+='<tr>'+r.map((c,i)=>'<td'+(i?' style="text-align:right;font-family:var(--mono)"':'')+'>'+c+'</td>').join('')+'</tr>'; });
+    return h+'</tbody></table></div>';
+  };
+  // all values derived from RULES so the reference auto-updates with the rules file
+  const A=RULES.age, E=RULES.education, F1=RULES.first_official_language_per_ability, CW=RULES.canadian_work_experience, AD=RULES.additional, SB=RULES.study_bonus;
+  const ns=(t,k)=>t[k][1], sp=(t,k)=>t[k][0];
+  let out='';
+  out+=tbl('Age (points)',['Age','No spouse','With spouse'],[['20–29',ns(A,'D'),sp(A,'D')],['30',ns(A,'N'),sp(A,'N')],['33',ns(A,'Q'),sp(A,'Q')],['35',ns(A,'S'),sp(A,'S')],['40',ns(A,'X'),sp(A,'X')],['44',ns(A,'AB'),sp(A,'AB')],['45+',ns(A,'AC'),sp(A,'AC')]]);
+  out+=tbl('Education (points)',['Level','No spouse','With spouse'],EDU_OPTS.map(o=>[o[1],ns(E,o[0]),sp(E,o[0])]));
+  out+=tbl('First language — per ability',['CLB','No spouse','With spouse'],CLB_OPTS.filter(o=>o[0]!=='A').map(o=>[o[1],ns(F1,o[0]),sp(F1,o[0])]));
+  out+=tbl('Canadian work experience',['Years','No spouse','With spouse'],['B','C','D','E','F'].map(k=>[CDNEXP_OPTS.find(o=>o[0]===k)[1],ns(CW,k),sp(CW,k)]));
+  out+=tbl('Skill transferability (max '+RULES.caps.skill_transferability_total+')',['Bucket','Max'],[['Education × language',50],['Education × Cdn exp',50],['Foreign exp × language',50],['Foreign × Cdn exp',50],['Certificate × language',50]]);
+  out+=tbl('Spouse factors (max 40)',['Factor','Max'],[['Education',10],['Language ('+RULES.caps.spouse_language_total+' max)',RULES.caps.spouse_language_total],['Canadian experience',10]]);
+  out+=tbl('Additional points',['Factor','Points'],[['Provincial nomination',AD.provincial_nomination],['Study in Canada 3yr+',SB.three_year_plus],['Study 1–2 yr',SB.one_or_two_year],['French bonus',AD.french_only+' / '+AD.french_with_english_clb5],['Sibling in Canada',AD.sibling_in_canada],['Job offer',AD.job_offer]]);
+  grid.innerHTML=out;
+}
+
+/* ---- boot ---- */
+loadState();
+if(Object.keys(vary).length===0){ vary['age']=new Set(['L','M','N','O','P']); } // opens with Age 28–32 comparison
+renderForm(); renderVars(); buildRef(); recompute();
+</script>
+
