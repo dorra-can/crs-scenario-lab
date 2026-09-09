@@ -930,6 +930,11 @@ function optLabel(f,v){ const o=f.opts.find(x=>x[0]===v); return o?o[1]:v; }
 /* which factors are varying -> {key:Set(values)} */
 const vary={};
 
+/* Spouse fields are relevant whenever ANY scenario in the current setup is
+   "with accompanying spouse": either the baseline is with-spouse, or the
+   Application type is being varied and includes the "with spouse" value. */
+function spouseInPlay(){ return state.spouse || !!(vary['spouse'] && vary['spouse'].has('1')); }
+
 /* ============================================================
    RENDER: baseline form
    ============================================================ */
@@ -938,9 +943,11 @@ function renderForm(){
   baseForm.innerHTML='';
   let curGroup=null;
   FACTORS.forEach(f=>{
-    if(f.spouseOnly && !state.spouse) return;
+    if(f.spouseOnly && !spouseInPlay()) return;
     if(f.group!==curGroup){ curGroup=f.group;
-      const gl=document.createElement('div'); gl.className='glabel'; gl.textContent=f.group; baseForm.appendChild(gl); }
+      const gl=document.createElement('div'); gl.className='glabel';
+      gl.textContent=(f.group==='Spouse' && !state.spouse) ? 'Spouse (for with-spouse scenarios)' : f.group;
+      baseForm.appendChild(gl); }
     const field=document.createElement('div'); field.className='field';
     const lab=document.createElement('label'); lab.textContent=f.name; lab.htmlFor='b_'+f.key;
     const sel=document.createElement('select'); sel.className='ctl'; sel.id='b_'+f.key;
@@ -961,9 +968,11 @@ function renderVars(){
   varList.innerHTML='';
   let curGroup=null;
   FACTORS.forEach(f=>{
-    if(f.spouseOnly && !state.spouse){ delete vary[f.key]; return; }
+    if(f.spouseOnly && !spouseInPlay()){ delete vary[f.key]; return; }
     if(f.group!==curGroup){ curGroup=f.group;
-      const gl=document.createElement('div'); gl.className='glabel'; gl.textContent=f.group; varList.appendChild(gl); }
+      const gl=document.createElement('div'); gl.className='glabel';
+      gl.textContent=(f.group==='Spouse' && !state.spouse) ? 'Spouse (for with-spouse scenarios)' : f.group;
+      varList.appendChild(gl); }
     const on=!!vary[f.key];
     const box=document.createElement('div'); box.className='var'+(on?' on':'');
     const h=document.createElement('div'); h.className='var-h';
@@ -971,6 +980,7 @@ function renderVars(){
     sw.innerHTML='<input type="checkbox" '+(on?'checked':'')+' aria-label="Vary '+f.name+'"><span class="slider"></span>';
     sw.querySelector('input').addEventListener('change',e=>{
       if(e.target.checked){ vary[f.key]=new Set([f.get(state)]); } else { delete vary[f.key]; }
+      if(f.key==='spouse') renderForm();
       renderVars(); recompute();
     });
     const nm=document.createElement('div'); nm.className='vname'; nm.textContent=f.name;
@@ -980,16 +990,16 @@ function renderVars(){
     if(on){
       const tools=document.createElement('div'); tools.className='var-tools';
       const all=document.createElement('button'); all.textContent='Select all';
-      all.onclick=()=>{ vary[f.key]=new Set(f.opts.map(o=>o[0])); renderVars(); recompute(); };
+      all.onclick=()=>{ vary[f.key]=new Set(f.opts.map(o=>o[0])); if(f.key==='spouse') renderForm(); renderVars(); recompute(); };
       const none=document.createElement('button'); none.textContent='Clear';
-      none.onclick=()=>{ vary[f.key]=new Set(); renderVars(); recompute(); };
+      none.onclick=()=>{ vary[f.key]=new Set(); if(f.key==='spouse') renderForm(); renderVars(); recompute(); };
       tools.appendChild(all); tools.appendChild(none); body.appendChild(tools);
       f.opts.forEach(o=>{
         const chip=document.createElement('span');
         const isCLB=/CLB|year|TEER/.test(o[1]);
         chip.className='opt'+(isCLB?' mini':'')+(vary[f.key].has(o[0])?' sel':'');
         chip.textContent=o[1];
-        chip.onclick=()=>{ const set=vary[f.key]; if(set.has(o[0]))set.delete(o[0]); else set.add(o[0]); renderVars(); recompute(); };
+        chip.onclick=()=>{ const set=vary[f.key]; if(set.has(o[0]))set.delete(o[0]); else set.add(o[0]); if(f.key==='spouse') renderForm(); renderVars(); recompute(); };
         body.appendChild(chip);
       });
     }
