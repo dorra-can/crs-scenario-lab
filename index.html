@@ -8,7 +8,7 @@
   --ink:#161C28; --muted:#5A6473; --faint:#8A93A2; --line:#DFE3EA; --line-2:#E9ECF1;
   --accent:#284BC8; --accent-ink:#1B3491; --accent-wash:#EAEEFB;
   --gain:#1E8E5A; --gain-wash:#E6F4EC; --loss:#C33B36; --loss-wash:#FBEAE9;
-  --amber:#B7791F;
+  --amber:#B7791F; --amber-wash:#FBF3E2;
   --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05);
   --shadow-lg:0 8px 30px rgba(16,24,40,.10);
   --radius:12px; --radius-sm:8px;
@@ -22,7 +22,7 @@
     --ink:#E7EBF3; --muted:#98A2B4; --faint:#6C7688; --line:#273040; --line-2:#202A3A;
     --accent:#6E8BFF; --accent-ink:#A8BAFF; --accent-wash:#18223B;
     --gain:#4FD08A; --gain-wash:#12281E; --loss:#F17D77; --loss-wash:#2C1918;
-    --amber:#E0A94A;
+    --amber:#E0A94A; --amber-wash:#2A2416;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.28);
     --shadow-lg:0 10px 34px rgba(0,0,0,.45);
   }
@@ -32,7 +32,7 @@
   --ink:#E7EBF3; --muted:#98A2B4; --faint:#6C7688; --line:#273040; --line-2:#202A3A;
   --accent:#6E8BFF; --accent-ink:#A8BAFF; --accent-wash:#18223B;
   --gain:#4FD08A; --gain-wash:#12281E; --loss:#F17D77; --loss-wash:#2C1918;
-  --amber:#E0A94A;
+  --amber:#E0A94A; --amber-wash:#2A2416;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.28);
   --shadow-lg:0 10px 34px rgba(0,0,0,.45);
 }
@@ -198,6 +198,26 @@ details.ref[open] > summary .tw{transform:rotate(180deg)}
 .warn{background:var(--loss-wash);border:1px solid var(--loss);color:var(--loss);border-radius:var(--radius-sm);
   padding:10px 13px;font-size:12.5px;margin-bottom:14px;display:none}
 .warn.show{display:block}
+/* ---- contextual notices ---- */
+#notices{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+#notices:empty{display:none}
+.ntc{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);
+  font-size:13px;line-height:1.5;border:1px solid;animation:ntcIn .22s ease}
+.ntc .ntc-ico{flex:none;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:13px;font-family:var(--display)}
+.ntc .ntc-body{flex:1}
+.ntc .ntc-body b{font-weight:700}
+.ntc.warn-ntc{background:var(--amber-wash);border-color:var(--amber);color:var(--ink)}
+.ntc.warn-ntc .ntc-ico{background:var(--amber);color:#fff}
+.ntc.info-ntc{background:var(--accent-wash);border-color:var(--accent);color:var(--ink)}
+.ntc.info-ntc .ntc-ico{background:var(--accent);color:#fff}
+.ntc-act{margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;
+  border:1px solid var(--amber);color:var(--amber);background:var(--surface);border-radius:6px;padding:5px 11px;cursor:pointer}
+.ntc-act:hover{background:var(--amber);color:#fff}
+.ntc-x{flex:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px}
+.ntc-x:hover{color:var(--ink)}
+@keyframes ntcIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.flash-target{animation:flashHi 1.6s ease}
+@keyframes flashHi{0%,100%{box-shadow:0 0 0 0 transparent}18%,55%{box-shadow:0 0 0 3px var(--amber)}}
 footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;line-height:1.6}
 .iconbtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);
   display:grid;place-items:center;color:var(--muted)}
@@ -328,6 +348,7 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:v
         </div>
       </section>
 
+      <div id="notices"></div>
       <div class="warn" id="warnBox"></div>
 
       <section>
@@ -935,6 +956,15 @@ const vary={};
    Application type is being varied and includes the "with spouse" value. */
 function spouseInPlay(){ return state.spouse || !!(vary['spouse'] && vary['spouse'].has('1')); }
 
+/* dismissed contextual notices (re-arm when their condition clears) */
+const noticeDismissed = new Set();
+function flashSpouse(){
+  const a=document.getElementById('spouseAnchor');
+  if(a) a.scrollIntoView({behavior:'smooth', block:'center'});
+  ['spEdu','spLang','spExp'].forEach(k=>{ const el=document.getElementById('b_'+k);
+    if(el){ el.classList.remove('flash-target'); void el.offsetWidth; el.classList.add('flash-target'); } });
+}
+
 /* ============================================================
    RENDER: baseline form
    ============================================================ */
@@ -947,6 +977,7 @@ function renderForm(){
     if(f.group!==curGroup){ curGroup=f.group;
       const gl=document.createElement('div'); gl.className='glabel';
       gl.textContent=(f.group==='Spouse' && !state.spouse) ? 'Spouse (for with-spouse scenarios)' : f.group;
+      if(f.group==='Spouse') gl.id='spouseAnchor';
       baseForm.appendChild(gl); }
     const field=document.createElement('div'); field.className='field';
     const lab=document.createElement('label'); lab.textContent=f.name; lab.htmlFor='b_'+f.key;
@@ -1008,6 +1039,51 @@ function renderVars(){
 }
 
 /* ============================================================
+   CONTEXTUAL NOTICES  (prompt the user when a variation needs setup)
+   ============================================================ */
+function renderNotices(){
+  const box=document.getElementById('notices'); if(!box) return;
+  const active=[];
+  // 1) A with-spouse scenario exists but the spouse has no details entered -> spouse scores 0
+  const spouseEmpty = state.spEdu==='A' && state.spLang==='none' && state.spExp==='A';
+  if(spouseInPlay() && spouseEmpty){
+    active.push({key:'spouse', type:'warn-ntc', ico:'!',
+      html:'<b>Set your spouse’s details.</b> Your “with accompanying spouse” scenarios are giving the spouse <b>0 points</b>. Enter their education, language and Canadian experience under <b>Held constant → Spouse</b> so the comparison is realistic.',
+      action:{label:'Jump to spouse details', fn:flashSpouse}});
+  }
+  // 2) Job offer is being varied, but it is worth 0 points since 2025
+  if(vary['job'] && vary['job'].size>1){
+    active.push({key:'job', type:'info-ntc', ico:'i',
+      html:'<b>Job offer scores 0 points.</b> Arranged-employment points were removed on 25 March 2025, so varying this factor will not change any score.'});
+  }
+  // 3) Second language is in play but the first language is French (French bonus needs English first)
+  const secondVaried = vary['l2clb'] && [...vary['l2clb']].some(v=>v!=='none');
+  const secondBaseline = state.l2clb!=='none';
+  const firstIsFrench = state.l1type==='C' || state.l1type==='D';
+  if(firstIsFrench && (secondVaried || secondBaseline)){
+    active.push({key:'frenchfirst', type:'info-ntc', ico:'i',
+      html:'<b>Heads up on the French bonus.</b> Your first language is French, so the 50-point French bonus can’t apply (it needs English as the <i>first</i> language at CLB 5+). Switch <b>First language → test</b> to an English test if you want to model that bonus.'});
+  }
+  // re-arm dismissals whose condition has cleared
+  const activeKeys=new Set(active.map(a=>a.key));
+  [...noticeDismissed].forEach(k=>{ if(!activeKeys.has(k)) noticeDismissed.delete(k); });
+  box.innerHTML='';
+  active.forEach(n=>{
+    if(noticeDismissed.has(n.key)) return;
+    const card=document.createElement('div'); card.className='ntc '+n.type;
+    const ico=document.createElement('div'); ico.className='ntc-ico'; ico.textContent=n.ico;
+    const body=document.createElement('div'); body.className='ntc-body'; body.innerHTML=n.html;
+    if(n.action){ const wrap=document.createElement('div');
+      const b=document.createElement('button'); b.className='ntc-act'; b.textContent=n.action.label; b.onclick=n.action.fn;
+      wrap.appendChild(b); body.appendChild(wrap); }
+    const x=document.createElement('button'); x.className='ntc-x'; x.textContent='×'; x.title='Dismiss';
+    x.onclick=()=>{ noticeDismissed.add(n.key); renderNotices(); };
+    card.appendChild(ico); card.appendChild(body); card.appendChild(x);
+    box.appendChild(card);
+  });
+}
+
+/* ============================================================
    COMPUTE + RENDER results
    ============================================================ */
 const SUBCOLS=[
@@ -1053,6 +1129,7 @@ function recompute(){
   renderTable(rows, vkeys, baseRes);
   renderSummary(rows, baseRes, total, capped);
   document.getElementById('scenCount').textContent = rows.length.toLocaleString()+(capped?' of '+total.toLocaleString():'')+' scenario'+(rows.length===1?'':'s');
+  renderNotices();
   saveState();
 }
 
