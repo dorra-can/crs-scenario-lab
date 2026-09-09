@@ -1,0 +1,346 @@
+{
+  "meta": {
+    "name": "Express Entry CRS rules",
+    "version": "1.0.0",
+    "source": "Government of Canada / IRCC \u2014 Express Entry CRS calculator (check-score) and CRS criteria page",
+    "rules_current_to": "2026",
+    "last_verified": "2026-09",
+    "verification": "Reconstructed engine matched the official IRCC calculator on 5,073 random full profiles (exact on grand total and all sub-scores).",
+    "notes": [
+      "Job offer / arranged employment points were removed on 2025-03-25 (now 0).",
+      "TCF Canada at CLB 4 scores 0 for the first official language (tool quirk).",
+      "French bonus pays 50 only when English is the FIRST language at CLB 5+ and French is second at CLB 7+; otherwise 25. PTE Core used as the SECOND language never reaches the 50 tier (tool quirk)."
+    ]
+  },
+  "clb": {
+    "H": 10,
+    "G": 9,
+    "F": 8,
+    "E": 7,
+    "D": 6,
+    "C": 5,
+    "B": 4,
+    "A": 0
+  },
+  "age": {
+    "A": [
+      0,
+      0
+    ],
+    "B": [
+      90,
+      99
+    ],
+    "C": [
+      95,
+      105
+    ],
+    "D": [
+      100,
+      110
+    ],
+    "E": [
+      100,
+      110
+    ],
+    "F": [
+      100,
+      110
+    ],
+    "G": [
+      100,
+      110
+    ],
+    "H": [
+      100,
+      110
+    ],
+    "I": [
+      100,
+      110
+    ],
+    "J": [
+      100,
+      110
+    ],
+    "K": [
+      100,
+      110
+    ],
+    "L": [
+      100,
+      110
+    ],
+    "M": [
+      100,
+      110
+    ],
+    "N": [
+      95,
+      105
+    ],
+    "O": [
+      90,
+      99
+    ],
+    "P": [
+      85,
+      94
+    ],
+    "Q": [
+      80,
+      88
+    ],
+    "R": [
+      75,
+      83
+    ],
+    "S": [
+      70,
+      77
+    ],
+    "T": [
+      65,
+      72
+    ],
+    "U": [
+      60,
+      66
+    ],
+    "V": [
+      55,
+      61
+    ],
+    "W": [
+      50,
+      55
+    ],
+    "X": [
+      45,
+      50
+    ],
+    "Y": [
+      35,
+      39
+    ],
+    "Z": [
+      25,
+      28
+    ],
+    "AA": [
+      15,
+      17
+    ],
+    "AB": [
+      5,
+      6
+    ],
+    "AC": [
+      0,
+      0
+    ]
+  },
+  "education": {
+    "A": [
+      0,
+      0
+    ],
+    "B": [
+      28,
+      30
+    ],
+    "C": [
+      84,
+      90
+    ],
+    "D": [
+      91,
+      98
+    ],
+    "E": [
+      112,
+      120
+    ],
+    "F": [
+      119,
+      128
+    ],
+    "G": [
+      126,
+      135
+    ],
+    "H": [
+      140,
+      150
+    ]
+  },
+  "first_official_language_per_ability": {
+    "H": [
+      32,
+      34
+    ],
+    "G": [
+      29,
+      31
+    ],
+    "F": [
+      22,
+      23
+    ],
+    "E": [
+      16,
+      17
+    ],
+    "D": [
+      8,
+      9
+    ],
+    "C": [
+      6,
+      6
+    ],
+    "B": [
+      6,
+      6
+    ],
+    "A": [
+      0,
+      0
+    ]
+  },
+  "second_official_language_per_ability": {
+    "H": [
+      6,
+      6
+    ],
+    "G": [
+      6,
+      6
+    ],
+    "F": [
+      3,
+      3
+    ],
+    "E": [
+      3,
+      3
+    ],
+    "D": [
+      1,
+      1
+    ],
+    "C": [
+      1,
+      1
+    ],
+    "B": [
+      0,
+      0
+    ],
+    "A": [
+      0,
+      0
+    ]
+  },
+  "spouse_language_per_ability": {
+    "H": 5,
+    "G": 5,
+    "F": 3,
+    "E": 3,
+    "D": 1,
+    "C": 1,
+    "B": 0,
+    "A": 0
+  },
+  "canadian_work_experience": {
+    "A": [
+      0,
+      0
+    ],
+    "B": [
+      35,
+      40
+    ],
+    "C": [
+      46,
+      53
+    ],
+    "D": [
+      56,
+      64
+    ],
+    "E": [
+      63,
+      72
+    ],
+    "F": [
+      70,
+      80
+    ]
+  },
+  "spouse_education": {
+    "A": 0,
+    "B": 2,
+    "C": 6,
+    "D": 7,
+    "E": 8,
+    "F": 9,
+    "G": 10,
+    "H": 10
+  },
+  "spouse_canadian_experience": {
+    "A": 0,
+    "B": 5,
+    "C": 7,
+    "D": 8,
+    "E": 9,
+    "F": 10
+  },
+  "caps": {
+    "second_lang_with_spouse": 22,
+    "second_lang_without_spouse": 24,
+    "skill_transferability_total": 100,
+    "additional_total": 600,
+    "spouse_language_total": 20,
+    "grand_total": 1200
+  },
+  "study_bonus": {
+    "none": 0,
+    "secondary": 0,
+    "one_or_two_year": 15,
+    "three_year_plus": 30
+  },
+  "additional": {
+    "provincial_nomination": 600,
+    "sibling_in_canada": 15,
+    "french_with_english_clb5": 50,
+    "french_only": 25,
+    "job_offer": 0
+  },
+  "skill_transferability": {
+    "education_tier2_levels": [
+      "F",
+      "G",
+      "H"
+    ],
+    "education_tier0_levels": [
+      "A",
+      "B"
+    ],
+    "_comment": "size-tier -> [half, full]. Education buckets use the education tier; foreign-experience buckets use the foreign level. half = CLB7-8 or 1yr Cdn / 1-2yr foreign; full = CLB9+ or 2yr+ Cdn / 3yr+ foreign.",
+    "points_by_tier": {
+      "1": [
+        13,
+        25
+      ],
+      "2": [
+        25,
+        50
+      ]
+    },
+    "certificate": {
+      "clb5": 25,
+      "clb7": 50
+    }
+  }
+}
