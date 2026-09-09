@@ -84,6 +84,15 @@ const vary={};
    Application type is being varied and includes the "with spouse" value. */
 function spouseInPlay(){ return state.spouse || !!(vary['spouse'] && vary['spouse'].has('1')); }
 
+/* dismissed contextual notices (re-arm when their condition clears) */
+const noticeDismissed = new Set();
+function flashSpouse(){
+  const a=document.getElementById('spouseAnchor');
+  if(a) a.scrollIntoView({behavior:'smooth', block:'center'});
+  ['spEdu','spLang','spExp'].forEach(k=>{ const el=document.getElementById('b_'+k);
+    if(el){ el.classList.remove('flash-target'); void el.offsetWidth; el.classList.add('flash-target'); } });
+}
+
 /* ============================================================
    RENDER: baseline form
    ============================================================ */
@@ -96,6 +105,7 @@ function renderForm(){
     if(f.group!==curGroup){ curGroup=f.group;
       const gl=document.createElement('div'); gl.className='glabel';
       gl.textContent=(f.group==='Spouse' && !state.spouse) ? 'Spouse (for with-spouse scenarios)' : f.group;
+      if(f.group==='Spouse') gl.id='spouseAnchor';
       baseForm.appendChild(gl); }
     const field=document.createElement('div'); field.className='field';
     const lab=document.createElement('label'); lab.textContent=f.name; lab.htmlFor='b_'+f.key;
@@ -157,6 +167,51 @@ function renderVars(){
 }
 
 /* ============================================================
+   CONTEXTUAL NOTICES  (prompt the user when a variation needs setup)
+   ============================================================ */
+function renderNotices(){
+  const box=document.getElementById('notices'); if(!box) return;
+  const active=[];
+  // 1) A with-spouse scenario exists but the spouse has no details entered -> spouse scores 0
+  const spouseEmpty = state.spEdu==='A' && state.spLang==='none' && state.spExp==='A';
+  if(spouseInPlay() && spouseEmpty){
+    active.push({key:'spouse', type:'warn-ntc', ico:'!',
+      html:'<b>Set your spouse’s details.</b> Your “with accompanying spouse” scenarios are giving the spouse <b>0 points</b>. Enter their education, language and Canadian experience under <b>Held constant → Spouse</b> so the comparison is realistic.',
+      action:{label:'Jump to spouse details', fn:flashSpouse}});
+  }
+  // 2) Job offer is being varied, but it is worth 0 points since 2025
+  if(vary['job'] && vary['job'].size>1){
+    active.push({key:'job', type:'info-ntc', ico:'i',
+      html:'<b>Job offer scores 0 points.</b> Arranged-employment points were removed on 25 March 2025, so varying this factor will not change any score.'});
+  }
+  // 3) Second language is in play but the first language is French (French bonus needs English first)
+  const secondVaried = vary['l2clb'] && [...vary['l2clb']].some(v=>v!=='none');
+  const secondBaseline = state.l2clb!=='none';
+  const firstIsFrench = state.l1type==='C' || state.l1type==='D';
+  if(firstIsFrench && (secondVaried || secondBaseline)){
+    active.push({key:'frenchfirst', type:'info-ntc', ico:'i',
+      html:'<b>Heads up on the French bonus.</b> Your first language is French, so the 50-point French bonus can’t apply (it needs English as the <i>first</i> language at CLB 5+). Switch <b>First language → test</b> to an English test if you want to model that bonus.'});
+  }
+  // re-arm dismissals whose condition has cleared
+  const activeKeys=new Set(active.map(a=>a.key));
+  [...noticeDismissed].forEach(k=>{ if(!activeKeys.has(k)) noticeDismissed.delete(k); });
+  box.innerHTML='';
+  active.forEach(n=>{
+    if(noticeDismissed.has(n.key)) return;
+    const card=document.createElement('div'); card.className='ntc '+n.type;
+    const ico=document.createElement('div'); ico.className='ntc-ico'; ico.textContent=n.ico;
+    const body=document.createElement('div'); body.className='ntc-body'; body.innerHTML=n.html;
+    if(n.action){ const wrap=document.createElement('div');
+      const b=document.createElement('button'); b.className='ntc-act'; b.textContent=n.action.label; b.onclick=n.action.fn;
+      wrap.appendChild(b); body.appendChild(wrap); }
+    const x=document.createElement('button'); x.className='ntc-x'; x.textContent='×'; x.title='Dismiss';
+    x.onclick=()=>{ noticeDismissed.add(n.key); renderNotices(); };
+    card.appendChild(ico); card.appendChild(body); card.appendChild(x);
+    box.appendChild(card);
+  });
+}
+
+/* ============================================================
    COMPUTE + RENDER results
    ============================================================ */
 const SUBCOLS=[
@@ -202,6 +257,7 @@ function recompute(){
   renderTable(rows, vkeys, baseRes);
   renderSummary(rows, baseRes, total, capped);
   document.getElementById('scenCount').textContent = rows.length.toLocaleString()+(capped?' of '+total.toLocaleString():'')+' scenario'+(rows.length===1?'':'s');
+  renderNotices();
   saveState();
 }
 

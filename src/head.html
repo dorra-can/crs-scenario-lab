@@ -8,7 +8,7 @@
   --ink:#161C28; --muted:#5A6473; --faint:#8A93A2; --line:#DFE3EA; --line-2:#E9ECF1;
   --accent:#284BC8; --accent-ink:#1B3491; --accent-wash:#EAEEFB;
   --gain:#1E8E5A; --gain-wash:#E6F4EC; --loss:#C33B36; --loss-wash:#FBEAE9;
-  --amber:#B7791F;
+  --amber:#B7791F; --amber-wash:#FBF3E2;
   --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05);
   --shadow-lg:0 8px 30px rgba(16,24,40,.10);
   --radius:12px; --radius-sm:8px;
@@ -22,7 +22,7 @@
     --ink:#E7EBF3; --muted:#98A2B4; --faint:#6C7688; --line:#273040; --line-2:#202A3A;
     --accent:#6E8BFF; --accent-ink:#A8BAFF; --accent-wash:#18223B;
     --gain:#4FD08A; --gain-wash:#12281E; --loss:#F17D77; --loss-wash:#2C1918;
-    --amber:#E0A94A;
+    --amber:#E0A94A; --amber-wash:#2A2416;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.28);
     --shadow-lg:0 10px 34px rgba(0,0,0,.45);
   }
@@ -32,7 +32,7 @@
   --ink:#E7EBF3; --muted:#98A2B4; --faint:#6C7688; --line:#273040; --line-2:#202A3A;
   --accent:#6E8BFF; --accent-ink:#A8BAFF; --accent-wash:#18223B;
   --gain:#4FD08A; --gain-wash:#12281E; --loss:#F17D77; --loss-wash:#2C1918;
-  --amber:#E0A94A;
+  --amber:#E0A94A; --amber-wash:#2A2416;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.28);
   --shadow-lg:0 10px 34px rgba(0,0,0,.45);
 }
@@ -198,6 +198,26 @@ details.ref[open] > summary .tw{transform:rotate(180deg)}
 .warn{background:var(--loss-wash);border:1px solid var(--loss);color:var(--loss);border-radius:var(--radius-sm);
   padding:10px 13px;font-size:12.5px;margin-bottom:14px;display:none}
 .warn.show{display:block}
+/* ---- contextual notices ---- */
+#notices{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+#notices:empty{display:none}
+.ntc{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);
+  font-size:13px;line-height:1.5;border:1px solid;animation:ntcIn .22s ease}
+.ntc .ntc-ico{flex:none;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:13px;font-family:var(--display)}
+.ntc .ntc-body{flex:1}
+.ntc .ntc-body b{font-weight:700}
+.ntc.warn-ntc{background:var(--amber-wash);border-color:var(--amber);color:var(--ink)}
+.ntc.warn-ntc .ntc-ico{background:var(--amber);color:#fff}
+.ntc.info-ntc{background:var(--accent-wash);border-color:var(--accent);color:var(--ink)}
+.ntc.info-ntc .ntc-ico{background:var(--accent);color:#fff}
+.ntc-act{margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;
+  border:1px solid var(--amber);color:var(--amber);background:var(--surface);border-radius:6px;padding:5px 11px;cursor:pointer}
+.ntc-act:hover{background:var(--amber);color:#fff}
+.ntc-x{flex:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px}
+.ntc-x:hover{color:var(--ink)}
+@keyframes ntcIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.flash-target{animation:flashHi 1.6s ease}
+@keyframes flashHi{0%,100%{box-shadow:0 0 0 0 transparent}18%,55%{box-shadow:0 0 0 3px var(--amber)}}
 footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;line-height:1.6}
 .iconbtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);
   display:grid;place-items:center;color:var(--muted)}
@@ -328,6 +348,7 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:v
         </div>
       </section>
 
+      <div id="notices"></div>
       <div class="warn" id="warnBox"></div>
 
       <section>
